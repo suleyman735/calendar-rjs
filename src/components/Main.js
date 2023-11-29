@@ -1,7 +1,8 @@
-import React,{useState} from 'react'
+import React,{useState, useEffect} from 'react'
 import { styled } from 'styled-components'
 import { ArrowUp,ArrowDown, } from 'react-bootstrap-icons';
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isToday } from 'date-fns';
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isToday,isSameDay } from 'date-fns';
+import axios from 'axios';
 
 function Main() {
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -16,28 +17,113 @@ function Main() {
         setCurrentDate(addDays(currentDate, -1));
       };
 
+      // Using fetch
+      const [data, setData] = useState();
+      const [pubHod,setpubHod] = useState();
+      const [todoTasks, setTodoTasks] = useState({}); 
+
+      function addTodoTask  (date, task)  {
+        // Copy the current tasks and add the new task for the specified date
+        setTodoTasks(prevTasks => ({
+          ...prevTasks,
+          [format(date, 'yyyy-MM-dd')]: [...(prevTasks[format(date, 'yyyy-MM-dd')] || []), task],
+        }));
+      };
+      
+function fetchData() {
+    
+        // Make API request
+        axios.get('https://date.nager.at/api/v3/PublicHolidays/2023/bb').then(response => {
+          // Update state with data
+          const isPublicHolidayRespon = response.data
+          const exTractisPublicHolidayRespon = isPublicHolidayRespon.map((ispublic)=>ispublic.date)
+        //   console.log(response.data);
+          setpubHod(response.data)
+
+          setData(exTractisPublicHolidayRespon);
+
+          
+        //   console.log(response.data);
+        })
+        .catch(error => {
+          // Handle errors
+          console.error('Error fetching data:', error);
+        });
+        
+
+    
+}
 
 
-const renderDays = ()=>{
+useEffect(()=>{
+    fetchData()
+    
+
+},[])
+
+
+
+const renderDays = (addTodoTask)=>{
         //   days show on calendar
         const monthStart = startOfMonth(currentDate);
         const monthEnd = endOfMonth(monthStart);
         const startDate = startOfWeek(monthStart);
         
         const endDate = endOfWeek(monthEnd);
+      
 
-        console.log(endDate);
+        // console.log(endDate);
         const rows = [];
         let days = [];
         let day = startDate;
 
+  
+      
+        const publicHolidays = data? data.map(dateString => new Date(dateString)):[];
+       
+        
+     
+        const isPublicHoliday = (date) => publicHolidays.some(holiday => isSameDay(date, holiday));
+
+        const publicHolidaysName =pubHod ? pubHod.map(item => ({
+            date: new Date(item.date),
+            name: item.name,
+          })):[];
+
+          const getPublicHolidayName = (date) => {
+            const holiday = publicHolidaysName.find(h => isSameDay(date, h.date));
+            return holiday ? holiday.name : '';
+          };
+
+          const handleAddTodo = (date) => {
+            const task = prompt('Enter your todo task:');
+            if (task) {
+              addTodoTask(date, task);
+            }
+          };
+        
+          
+       
+
     while (day<=endDate) {
         for (let i = 0; i < 7; i++) {
+            // console.log(day);
             days.push(
-                <div  key={day}  className={`cell ${!isSameMonth(day, monthStart) ? 'disabled' : ''} ${isToday(day) ? 'today' : ''}`}>
+                <div onClick={()=>handleAddTodo(day)} key={day}  className={`cell ${!isSameMonth(day, monthStart) ? 'disabled' : ''} ${isToday(day) ? 'today' : ''} ${isPublicHoliday(day) ? 'public-holiday' : ''}`} o>
                     {format(day,'d')}
+                    <div className="holiday-name">{getPublicHolidayName(day)}</div>
+
+                    {todoTasks[format(day, 'yyyy-MM-dd')] && (
+            <ul className="todo-list">
+              {todoTasks[format(day, 'yyyy-MM-dd')].map((task, index) => (
+                <li key={index}>{task}</li>
+              ))}
+            </ul>
+          )}
+           <div onClick={() => handleAddTodo(day)}>Add Todo</div>
                 </div>
                 
+                // ${holidaysTime(day) ? 'public-holiday' : ''}
             )
             day = addDays(day, 1);
 
@@ -95,7 +181,7 @@ const renderWeek = () => {
             {renderWeek()}
 
 
-            {renderDays()}
+            {renderDays(data,pubHod,addTodoTask)}
             {/* <div className='container mainDays'>
 
                          
@@ -175,7 +261,9 @@ background-color: antiquewhite;
     height: 20px;
     background-color: #E3E4E6;
     margin: 2px;
+    display: flex;
     text-align: end;
+    
 }
 
 .cell.disabled {
@@ -184,6 +272,31 @@ background-color: antiquewhite;
 
 .cell.today {
   background-color: #f0f0f0;
+}
+
+.public-holiday {
+  background-color: #ffcccb; /* Light red for example */
+  color: #cc0000; /* Dark red for example */
+  font-weight: bold;
+}
+.holiday-name {
+  font-size: 0.6em; /* Adjust the font size as needed */
+  color: #cc0000; /* Dark red for example */
+}
+
+.todo-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 5px;
+}
+
+.todo-list li {
+  border-top: 1px solid #ddd;
+  padding: 5px;
+}
+
+.todo-list li:first-child {
+  border-top: none;
 }
 
 
