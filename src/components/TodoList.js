@@ -2,14 +2,17 @@
 import React from 'react';
 import TodoItem from './TodoItem';
 
-const TodoList = ({ tasks, completeTask,onDragStart,onDragEnd }) => {
+
+const TodoList = ({ filteredTasks, editedTask,setEditedTask,tasks, completeTask,onDragStart,onDragEnd,onDeleteTask ,onStartEdit ,onCancelEdit,onSaveEdit}) => {
   return (
     <div>
 
 
-        
+
       {tasks.map((task, index) => (
-        <TodoItem key={task.id} id = {task.id} task={task} tasks={tasks} date={task.date} />
+        
+        
+        <TodoItem filteredTasks={filteredTasks} editedTask={editedTask} setEditedTask={setEditedTask}   key={task.id} id = {task.id} task={task} tasks={tasks} date={task.date} onDragStart={onDragStart} onDragEnd={onDragEnd} onDeleteTask={onDeleteTask} onStartEdit={onStartEdit} onCancelEdit={onCancelEdit} onSaveEdit={onSaveEdit} />
       ))}
     </div>
   );

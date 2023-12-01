@@ -24,7 +24,13 @@ function Main() {
   const [newTask, setNewTask] = useState();
   const [selectedDate, setSelectedDate] = useState("");
   const [idCounter, setIdCounter] = useState(1);
-  const [draggedTask, setDraggedTask] = useState("");
+  const [draggedTask, setDraggedTask] = useState(null);
+  const [editedTask, setEditedTask] = useState(null);
+  const [searchText, setSearchText] = useState('');
+
+  
+
+
 
 
 
@@ -157,6 +163,27 @@ function Main() {
       setIdCounter(idCounter + 1);
     }
   };
+  const deleteTask = (taskId) => {
+    const updatedTasks = tasks.filter((task) => task.id !== taskId);
+    setTasks(updatedTasks);
+  };
+
+  const startEdit = (taskId) => {
+    const taskToEdit = tasks.find((task) => task.id === taskId);
+    setEditedTask(taskToEdit);
+  };
+  
+  const cancelEdit = () => {
+    setEditedTask(null);
+  };
+  
+  const saveEdit = (taskId, updatedTask) => {
+    const updatedTasks = tasks.map((task) =>
+      task.id === taskId ? updatedTask : task
+    );
+    setTasks(updatedTasks);
+    setEditedTask(null);
+  };
 
   const completeTask = (taskId) => {
     //   const updatedTasks = [...tasks];
@@ -172,12 +199,54 @@ function Main() {
     fetchData();
   }, []);
 
-  const handleTaskDrop = (taskId, dropDate) => {
+  const handleDragStart = (e, task) => {
+    setDraggedTask(task);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', ''); // Necessary for Firefox
+  };
+  
+  const handleDragEnd = () => {
+    setDraggedTask(null);
+  };
+
+  const handleDragOver = (e) => {
+  e.preventDefault();
+};
+
+const handleDrop = (e, date) => {
+  e.preventDefault();
+
+  if (draggedTask) {
+    // Reassign the task to the new date
     const updatedTasks = tasks.map((task) =>
-      tasks.id === taskId ? { ...task, date: dropDate } : task
+      task === draggedTask ? { ...task, date } : task
     );
     setTasks(updatedTasks);
+  }
+};
+
+  const handleTaskDrop = (taskId, dropDate) => {
+    setTasks([
+        ...tasks,
+        { id: idCounter, task: newTask, date: dropDate },
+      ]);
+    // const updatedTasks = tasks.map((task) =>
+    //   tasks.id === taskId ? { ...task, date: dropDate } : task
+    // );
+    // setTasks(updatedTasks);
   };
+
+
+  //Search text
+  const handleSearchTextChange = (e) => {
+    e.preventDefault()
+    // console.log(e.target.value);
+    setSearchText(e.target.value);
+  };
+
+  const filteredTasks = tasks.filter((task) =>task.task.toLowerCase().includes(searchText.toLowerCase()));
+
+
   const renderDays = (todoTasks) => {
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(monthStart);
@@ -228,8 +297,10 @@ function Main() {
             }`}
           >
             {format(day, "d")}
+            
 
-            <TodoList tasks={tasksForDay} date={selectedDate} onTaskDrop={handleTaskDrop}/>
+            <TodoList editedTask={editedTask} setEditedTask={setEditedTask} tasks={tasksForDay} date={selectedDate} onDragStart={(e) => handleDragStart(e, tasks)} onTaskDrop={handleTaskDrop} onDeleteTask={deleteTask}  onStartEdit={startEdit} onCancelEdit={cancelEdit} onSaveEdit={saveEdit} filteredTasks={filteredTasks} 
+/>
 
 
 
@@ -294,7 +365,15 @@ function Main() {
           }
         }}
       />
+       {/* <button onClick={() => onStartEdit('task.id')}>Edit</button>
+          <button onClick={() => onDeleteTask('task.id')}>Delete</button> */}
       <button onClick={downloadCalendarAsImage}>Download as Image</button>
+      <input
+  type="text"
+  value={searchText}
+  onChange={handleSearchTextChange}
+  placeholder="Search tasks"
+/>
             {/* <input
               type="file"
               onChange={(e) => {
@@ -332,6 +411,10 @@ function Main() {
         placeholder="Add a new task"
       />
       <button onClick={addTask}>Add Task</button>
+    
+      {filteredTasks.map((task) => <h3 key={task.id} style={{color:'red'}}>{task.task}</h3>)}
+ 
+     
     </MainSection>
   );
 }
