@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import html2canvas from 'html2canvas';
+import html2canvas from "html2canvas";
 import { styled } from "styled-components";
 import { ArrowUp, ArrowDown } from "react-bootstrap-icons";
 import {
@@ -17,6 +17,7 @@ import {
 import axios from "axios";
 import DatePicker from "react-datepicker";
 import TodoList from "./TodoList";
+import TodoItem from "./TodoItem";
 
 function Main() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -26,13 +27,7 @@ function Main() {
   const [idCounter, setIdCounter] = useState(1);
   const [draggedTask, setDraggedTask] = useState(null);
   const [editedTask, setEditedTask] = useState(null);
-  const [searchText, setSearchText] = useState('');
-
-  
-
-
-
-
+  const [searchText, setSearchText] = useState("");
 
   // Export calendar data to JSON
   const exportDataToJson = () => {
@@ -45,22 +40,22 @@ function Main() {
     };
     const jsonString = JSON.stringify(exportData);
     localStorage.setItem("calendarData", JSON.stringify(jsonString));
-      // Create a Blob with the JSON data
-  const blob = new Blob([jsonString], { type: 'application/json' });
+    // Create a Blob with the JSON data
+    const blob = new Blob([jsonString], { type: "application/json" });
 
-  // Create a download link
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'calendar_data.json';
+    // Create a download link
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "calendar_data.json";
 
-  // Append the link to the document and trigger a click to start the download
-  document.body.appendChild(link);
-  link.click();
+    // Append the link to the document and trigger a click to start the download
+    document.body.appendChild(link);
+    link.click();
 
-  // Remove the link from the document
-  document.body.removeChild(link);
+    // Remove the link from the document
+    document.body.removeChild(link);
 
-  console.log('Exported JSON to file.');
+    console.log("Exported JSON to file.");
     // You can save or use the jsonString as needed
     console.log("Exported JSON:", jsonString);
   };
@@ -87,34 +82,33 @@ function Main() {
   };
 
   const downloadCalendarAsImage = async () => {
-    const calendarElement = document.getElementById('your-calendar-id'); // Replace with the actual ID of your calendar container
+    const calendarElement = document.getElementById("your-calendar-id"); // Replace with the actual ID of your calendar container
     if (!calendarElement) {
-      console.error('Calendar element not found.');
+      console.error("Calendar element not found.");
       return;
     }
-  
+
     try {
       const canvas = await html2canvas(calendarElement);
-      const image = canvas.toDataURL('image/png');
-  
+      const image = canvas.toDataURL("image/png");
+
       // Create a download link
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = image;
-      link.download = 'calendar_image.png';
-  
+      link.download = "calendar_image.png";
+
       // Append the link to the document and trigger a click to start the download
       document.body.appendChild(link);
       link.click();
-  
+
       // Remove the link from the document
       document.body.removeChild(link);
-  
-      console.log('Calendar image downloaded.');
+
+      console.log("Calendar image downloaded.");
     } catch (error) {
-      console.error('Error capturing calendar as image:', error);
+      console.error("Error capturing calendar as image:", error);
     }
   };
-  
 
   // next/prev button
   const nextMonth = () => {
@@ -172,11 +166,11 @@ function Main() {
     const taskToEdit = tasks.find((task) => task.id === taskId);
     setEditedTask(taskToEdit);
   };
-  
+
   const cancelEdit = () => {
     setEditedTask(null);
   };
-  
+
   const saveEdit = (taskId, updatedTask) => {
     const updatedTasks = tasks.map((task) =>
       task.id === taskId ? updatedTask : task
@@ -201,51 +195,48 @@ function Main() {
 
   const handleDragStart = (e, task) => {
     setDraggedTask(task);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', ''); // Necessary for Firefox
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", ""); // Necessary for Firefox
   };
-  
+
   const handleDragEnd = () => {
     setDraggedTask(null);
   };
 
   const handleDragOver = (e) => {
-  e.preventDefault();
-};
+    e.preventDefault();
+  };
 
-const handleDrop = (e, date) => {
-  e.preventDefault();
+  const handleDrop = (e, date) => {
+    e.preventDefault();
 
-  if (draggedTask) {
-    // Reassign the task to the new date
-    const updatedTasks = tasks.map((task) =>
-      task === draggedTask ? { ...task, date } : task
-    );
-    setTasks(updatedTasks);
-  }
-};
+    if (draggedTask) {
+      // Reassign the task to the new date
+      const updatedTasks = tasks.map((task) =>
+        task === draggedTask ? { ...task, date } : task
+      );
+      setTasks(updatedTasks);
+    }
+  };
 
   const handleTaskDrop = (taskId, dropDate) => {
-    setTasks([
-        ...tasks,
-        { id: idCounter, task: newTask, date: dropDate },
-      ]);
+    setTasks([...tasks, { id: idCounter, task: newTask, date: dropDate }]);
     // const updatedTasks = tasks.map((task) =>
     //   tasks.id === taskId ? { ...task, date: dropDate } : task
     // );
     // setTasks(updatedTasks);
   };
 
-
   //Search text
   const handleSearchTextChange = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     // console.log(e.target.value);
     setSearchText(e.target.value);
   };
 
-  const filteredTasks = tasks.filter((task) =>task.task.toLowerCase().includes(searchText.toLowerCase()));
-
+  const filteredTasks = tasks.filter((task) =>
+    task.task.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   const renderDays = (todoTasks) => {
     const monthStart = startOfMonth(currentDate);
@@ -285,11 +276,10 @@ const handleDrop = (e, date) => {
             onClick={(e) =>
               setSelectedDate(e.target.getAttribute("data-value"))
             }
-            onDrop={(e) => handleTaskDrop(draggedTask, e.target.getAttribute("data-value"))}
+            onDrop={(e) =>
+              handleTaskDrop(draggedTask, e.target.getAttribute("data-value"))
+            }
             onDragOver={(e) => e.preventDefault()}
-
-      
-        
             className={`cell ${
               !isSameMonth(day, monthStart) ? "disabled" : ""
             } ${isToday(day) ? "today" : ""} ${
@@ -297,12 +287,20 @@ const handleDrop = (e, date) => {
             }`}
           >
             {format(day, "d")}
-            
 
-            <TodoList editedTask={editedTask} setEditedTask={setEditedTask} tasks={tasksForDay} date={selectedDate} onDragStart={(e) => handleDragStart(e, tasks)} onTaskDrop={handleTaskDrop} onDeleteTask={deleteTask}  onStartEdit={startEdit} onCancelEdit={cancelEdit} onSaveEdit={saveEdit} filteredTasks={filteredTasks} 
-/>
-
-
+            <TodoItem
+              editedTask={editedTask}
+              setEditedTask={setEditedTask}
+              tasks={tasksForDay}
+              date={selectedDate}
+              onDragStart={(e) => handleDragStart(e, tasks)}
+              onTaskDrop={handleTaskDrop}
+              onDeleteTask={deleteTask}
+              onStartEdit={startEdit}
+              onCancelEdit={cancelEdit}
+              onSaveEdit={saveEdit}
+              filteredTasks={filteredTasks}
+            />
 
             <div className="holiday-name">{getPublicHolidayName(day)}</div>
           </div>
@@ -316,20 +314,59 @@ const handleDrop = (e, date) => {
       );
       days = [];
     }
-    return <div className="container mainDays" id="your-calendar-id">{rows}</div>;
+    return (
+      <div className="container mainDays" id="your-calendar-id">
+        {rows}
+      </div>
+    );
   };
 
   const renderWeek = () => {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
     return (
-      <div className="container weekDays">
-        <div className="row">
-          {days.map((day) => (
-            <div key={day} className="col-2">
-              {day}
+      <div>
+        <div className="container">
+          <div className="row">
+            <div className="col-2">
+              <button className="btn btn-primary" onClick={exportDataToJson}>Export JSON</button>
             </div>
-          ))}
+            <div className="col-2">
+            <input
+            className=""
+           
+              type="file"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  importDataFromJsonFile(file);
+                }
+              }}
+            />
+            </div>
+            <div className="col-3">
+            <button className="btn btn-primary" onClick={downloadCalendarAsImage}>Download as Image</button>
+
+            </div>
+            <div className="col-2">
+            <input
+              type="text"
+              value={searchText}
+              onChange={handleSearchTextChange}
+              placeholder="Search tasks"
+            />
+            </div>
+
+          </div>
+        </div>
+        <div className="container weekDays">
+          <div className="row">
+            {days.map((day) => (
+              <div key={day} className="col-2">
+                {day}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -355,25 +392,19 @@ const handleDrop = (e, date) => {
             <div>
               <h2>{format(currentDate, "MMMM d yyyy")}</h2>
             </div>
-            <button onClick={exportDataToJson}>Export to JSON</button>
-            <input
-        type="file"
-        onChange={(e) => {
-          const file = e.target.files[0];
-          if (file) {
-            importDataFromJsonFile(file);
-          }
-        }}
-      />
-       {/* <button onClick={() => onStartEdit('task.id')}>Edit</button>
-          <button onClick={() => onDeleteTask('task.id')}>Delete</button> */}
-      <button onClick={downloadCalendarAsImage}>Download as Image</button>
+            <div className="col-5">
+            {selectedDate}
       <input
-  type="text"
-  value={searchText}
-  onChange={handleSearchTextChange}
-  placeholder="Search tasks"
-/>
+        type="text"
+        value={newTask}
+        onChange={(e) => setNewTask(e.target.value)}
+        placeholder="Add a new task"
+      />
+      <button onClick={addTask}>Add Task</button>
+            </div>
+
+
+
             {/* <input
               type="file"
               onChange={(e) => {
@@ -388,14 +419,14 @@ const handleDrop = (e, date) => {
                 }
               }}
             /> */}
-            <div className="d-flex d-inline-flex justify-content-between">
+            {/* <div className="d-flex d-inline-flex justify-content-between">
               <div className="week">
                 <a href="">Week</a>
               </div>
               <div className="month">
                 <a href="">Month</a>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -403,18 +434,13 @@ const handleDrop = (e, date) => {
       {renderWeek()}
 
       {renderDays(data, pubHod)}
-      {selectedDate}
-      <input
-        type="text"
-        value={newTask}
-        onChange={(e) => setNewTask(e.target.value)}
-        placeholder="Add a new task"
-      />
-      <button onClick={addTask}>Add Task</button>
-    
-      {filteredTasks.map((task) => <h3 key={task.id} style={{color:'red'}}>{task.task}</h3>)}
- 
-     
+
+
+      {filteredTasks.map((task) => (
+        <h3 key={task.id} style={{ color: "red" }}>
+          {task.task}
+        </h3>
+      ))}
     </MainSection>
   );
 }
@@ -459,14 +485,26 @@ const MainSection = styled.div`
   }
 
   .todo-list {
+
     list-style: none;
     padding: 0;
-    margin-top: 5px;
+    /* margin-top: 5px; */
   }
 
   .todo-list li {
     border-top: 1px solid #ddd;
-    padding: 5px;
+    /* padding: 5px; */
+    height: 60px;
+    width: 140px !important;
+    background-color: white;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: row;
+  }
+  .todo-list li button{
+    font-size: 10px;
+    /* width: ; */
+
   }
 
   .todo-list li:first-child {

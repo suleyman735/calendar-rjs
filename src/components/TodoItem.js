@@ -1,29 +1,17 @@
 
 import React from 'react';
 import Main from './Main';
+import { styled } from 'styled-components';
 
 
 const TodoItem = ({filteredTasks={filteredTasks}, editedTask,setEditedTask, id,task,date,tasks, completeTask,onDragStart,onDragEnd ,onDeleteTask,onStartEdit ,onCancelEdit,onSaveEdit}) => {
 
-    const handleDragStart = (e, id) => {
-        e.dataTransfer.setData("text/plain", id);
-        // console.log(id);
-      };
-    
-      const handleDragOver = (e) => {
-        e.preventDefault();
-      };
-    
-      const handleDrop = (e, dropDate) => {
-        e.preventDefault();
-        const taskId = e.dataTransfer.getData("text/plain");
-        // Perform the drop action here, e.g., update the task with the new date
-        // You may need to pass a function from the Main component to handle the drop action
-      };
+
 
   return (
     
-    <div>
+    <ListContainer>
+
 
 <ul className="todo-list">
   {tasks.map((task) => (
@@ -91,9 +79,16 @@ const TodoItem = ({filteredTasks={filteredTasks}, editedTask,setEditedTask, id,t
        
 
       {/* <span style={{ marginLeft: '10px' }}>Date: {date}</span> */}
-    </div>
+    </ListContainer>
   );
 };
+
+const ListContainer = styled.div`
+/* height: 1000px !important; */
+/* width: 100px; */
+background-color: red;
+z-index: 999;
+`
 
 
 
