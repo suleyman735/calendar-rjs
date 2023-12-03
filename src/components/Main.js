@@ -28,6 +28,7 @@ function Main() {
   const [draggedTask, setDraggedTask] = useState(null);
   const [editedTask, setEditedTask] = useState(null);
   const [searchText, setSearchText] = useState("");
+  const [isHashol,setisHashol] = useState(false)
 
   // Export calendar data to JSON
   const exportDataToJson = () => {
@@ -133,7 +134,7 @@ function Main() {
         const exTractisPublicHolidayRespon = isPublicHolidayRespon.map(
           (ispublic) => ispublic.date
         );
-        //   console.log(response.data);
+          console.log(response.data);
         setpubHod(response.data);
 
         setData(exTractisPublicHolidayRespon);
@@ -258,12 +259,20 @@ function Main() {
           name: item.name,
         }))
       : [];
-
+      
     const getPublicHolidayName = (date) => {
-      const holiday = publicHolidaysName.find((h) => isSameDay(date, h.date));
+
+      const holiday = publicHolidaysName.find((h) =>isSameDay(date, h.date));
+      //  console.log(holiday ? holiday.date : "");
+      
+// setisHashol(true);
       return holiday ? holiday.name : "";
+      
+      
+
     };
 
+    console.log();
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
         const currentDate = format(day, "dd-MM-yyyy");
@@ -274,7 +283,8 @@ function Main() {
             key={day}
             data-value={format(day, "dd-MM-yyyy")}
             onClick={(e) =>
-              setSelectedDate(e.target.getAttribute("data-value"))
+              setSelectedDate(e.target.getAttribute("data-value")) 
+               
             }
             onDrop={(e) =>
               handleTaskDrop(draggedTask, e.target.getAttribute("data-value"))
@@ -287,6 +297,7 @@ function Main() {
             }`}
           >
             {format(day, "d")}
+            <div className="holiday-name">{getPublicHolidayName(day)}</div>
 
             <TodoItem
               editedTask={editedTask}
@@ -302,7 +313,7 @@ function Main() {
               filteredTasks={filteredTasks}
             />
 
-            <div className="holiday-name">{getPublicHolidayName(day)}</div>
+            
           </div>
         );
         day = addDays(day, 1);
@@ -310,6 +321,7 @@ function Main() {
       rows.push(
         <div key={day} className="row">
           {days}
+          
         </div>
       );
       days = [];
@@ -405,28 +417,7 @@ function Main() {
 
 
 
-            {/* <input
-              type="file"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onload = (event) => {
-                    const jsonString = event.target.result;
-                    importDataFromJsonFile(jsonString);
-                  };
-                  reader.readAsText(file);
-                }
-              }}
-            /> */}
-            {/* <div className="d-flex d-inline-flex justify-content-between">
-              <div className="week">
-                <a href="">Week</a>
-              </div>
-              <div className="month">
-                <a href="">Month</a>
-              </div>
-            </div> */}
+
           </div>
         </div>
       </div>
@@ -453,7 +444,7 @@ const MainSection = styled.div`
 
   .mainDays div div {
     width: 13%;
-    height: 120px;
+    /* height: 50px; */
     background-color: #e3e4e6;
     margin: 2px;
   }
@@ -480,36 +471,13 @@ const MainSection = styled.div`
     font-weight: bold;
   }
   .holiday-name {
+    /* height: 10px;
+    width: 10px; */
     font-size: 0.6em; /* Adjust the font size as needed */
     color: #cc0000; /* Dark red for example */
   }
 
-  .todo-list {
 
-    list-style: none;
-    padding: 0;
-    /* margin-top: 5px; */
-  }
-
-  .todo-list li {
-    border-top: 1px solid #ddd;
-    /* padding: 5px; */
-    height: 60px;
-    width: 140px !important;
-    background-color: white;
-    border-radius: 5px;
-    display: flex;
-    flex-direction: row;
-  }
-  .todo-list li button{
-    font-size: 10px;
-    /* width: ; */
-
-  }
-
-  .todo-list li:first-child {
-    border-top: none;
-  }
 `;
 
 export default Main;

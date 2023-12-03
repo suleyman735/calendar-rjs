@@ -24,6 +24,7 @@ const TodoItem = ({filteredTasks={filteredTasks}, editedTask,setEditedTask, id,t
       {editedTask && editedTask.id === task.id ? (
         <div>
           <input
+          id='textSize'
             type="text"
             value={editedTask.task}
             onChange={(e) =>
@@ -33,16 +34,20 @@ const TodoItem = ({filteredTasks={filteredTasks}, editedTask,setEditedTask, id,t
               }))
             }
           />
+          <div className='buttons'>
           <button onClick={() => onSaveEdit(task.id, editedTask)}>
             Save
           </button>
           <button onClick={onCancelEdit}>Cancel</button>
+          </div>
         </div>
       ) : (
         <div>
-          {task.task}
+          <h6>{task.task}</h6>
+          <div className='buttons'>
           <button onClick={() => onStartEdit(task.id)}>Edit</button>
           <button onClick={() => onDeleteTask(task.id)}>Delete</button>
+          </div>
         </div>
       )}
 
@@ -52,33 +57,6 @@ const TodoItem = ({filteredTasks={filteredTasks}, editedTask,setEditedTask, id,t
 </ul>
 
 
-
-
-
-
-            {/* <ul className="todo-list" onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, date)}>
-      {tasks.map((task) => (
-        <li
-          key={task.id}
-          draggable
-          onDragStart={(e) => handleDragStart(e, task.id)}
-        >
-            
-          {task.task}
-          <button onClick={() => onStartEdit(task.id)}>Edit</button>
-          <button onClick={() => onDeleteTask(task.id)}>Delete</button>
-        </li>
-      ))}
-    </ul> */}
-
-
-      {/* <input type="checkbox" onChange={completeTask} /> */}
-      {/* <span>{task.task}</span>
-
-          <button onClick={onCancelEdit}>Cancel</button> */}
-       
-
-      {/* <span style={{ marginLeft: '10px' }}>Date: {date}</span> */}
     </ListContainer>
   );
 };
@@ -88,6 +66,50 @@ const ListContainer = styled.div`
 /* width: 100px; */
 background-color: red;
 z-index: 999;
+
+.todo-list {
+
+list-style: none;
+padding: 0;
+/* margin-top: 5px; */
+}
+
+.todo-list li {
+border-top: 1px solid #ddd;
+/* padding: 5px; */
+height: 60px;
+width: 140px !important;
+background-color: white;
+border-radius: 5px;
+/* display: flex;
+flex-direction: row; */
+}
+
+.todo-list li div .buttons{
+  display: flex;
+  flex-direction: row;
+  width: 20px;
+  height: 20px;
+
+  /* margin: 10px; */
+}
+
+
+/* .todo-list li div input[type='text']{
+  font-size: 2px;
+} */
+.todo-list li button{
+font-size: 10px;
+/* width: ; */
+
+}
+
+.todo-list li:first-child {
+border-top: none;
+}
+#textSize{
+  font-size: 10px !important;
+}
 `
 
 
