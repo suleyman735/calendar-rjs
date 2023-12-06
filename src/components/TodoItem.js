@@ -19,7 +19,9 @@ const TodoItem = ({filteredTasks={filteredTasks}, editedTask,setEditedTask, id,t
       key={task.id}
       onDragStart={(e) => onDragStart(e, task)}
       onDragEnd={onDragEnd}
-      draggable // Make the task item draggable
+      // draggable={!isHoliday}
+      draggable
+      style={{ color: task.color }} // Make the task item draggable
     >
       {editedTask && editedTask.id === task.id ? (
         <div>

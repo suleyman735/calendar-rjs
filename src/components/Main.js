@@ -13,6 +13,7 @@ import {
   isToday,
   isSameDay,
   parse,
+  startOfDay,
 } from "date-fns";
 import axios from "axios";
 import DatePicker from "react-datepicker";
@@ -20,15 +21,24 @@ import TodoList from "./TodoList";
 import TodoItem from "./TodoItem";
 
 function Main() {
+  const [data, setData] = useState();
+  const [pubHod, setpubHod] = useState();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [tasks, setTasks] = useState([]);
-  const [newTask, setNewTask] = useState();
+  const [newTask, setNewTask] = useState({
+    text:'',
+    color:'#fff'
+  });
+  
   const [selectedDate, setSelectedDate] = useState("");
   const [idCounter, setIdCounter] = useState(1);
   const [draggedTask, setDraggedTask] = useState(null);
   const [editedTask, setEditedTask] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [isHashol,setisHashol] = useState(false)
+
+  const [selectedYear, setSelectedYear] = useState("2023");
+  const [selectedCountry, setSelectedCountry] = useState("BB");
 
   // Export calendar data to JSON
   const exportDataToJson = () => {
@@ -121,13 +131,12 @@ function Main() {
   };
 
   // Using fetch
-  const [data, setData] = useState();
-  const [pubHod, setpubHod] = useState();
 
-  function fetchData() {
+
+  function fetchData(year,code) {
     // Make API request
     axios
-      .get("https://date.nager.at/api/v3/PublicHolidays/2023/bb")
+      .get(`https://date.nager.at/api/v3/PublicHolidays/${year}/${code}`)
       .then((response) => {
         // Update state with data
         const isPublicHolidayRespon = response.data;
@@ -147,13 +156,16 @@ function Main() {
       });
   }
 
+
+
   const addTask = () => {
-    if (newTask.trim() !== "" && selectedDate !== "") {
+   console.log( newTask);
+    if (newTask.text.trim() !== "" && selectedDate !== "") {
       setTasks([
         ...tasks,
-        { id: idCounter, task: newTask, date: selectedDate },
+        { id: idCounter, task: newTask.text, date: selectedDate,color: newTask.color  },
       ]);
-      setNewTask("");
+      setNewTask({ text: '', color: '#ffffff' });
       setSelectedDate("");
       setIdCounter(idCounter + 1);
     }
@@ -180,19 +192,30 @@ function Main() {
     setEditedTask(null);
   };
 
-  const completeTask = (taskId) => {
-    //   const updatedTasks = [...tasks];
-    const updatedTasks = tasks.map((task) =>
-      task.id === taskId ? { ...task, task: `✅ ${task.task}` } : task
-    );
+  // const completeTask = (taskId) => {
+  //   //   const updatedTasks = [...tasks];
+  //   const updatedTasks = tasks.map((task) =>
+  //     task.id === taskId ? { ...task, task: `✅ ${task.task}` } : task
+  //   );
 
-    //   updatedTasks[index].task = `✅ ${tasks[index].task}`;
-    setTasks(updatedTasks);
-  };
+  //   //   updatedTasks[index].task = `✅ ${tasks[index].task}`;
+  //   setTasks(updatedTasks);
+  // };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData(selectedYear, selectedCountry);
+  }, [tasks]);
+
+  const handleSelectYear = (selectedYear) => {
+    setSelectedYear(selectedYear);
+    // Fetch data when year is selected
+    fetchData(selectedYear, selectedCountry);
+  };
+
+  const handleSelectCountry = (selectedCountry) => {
+    setSelectedCountry(selectedCountry);
+    fetchData(selectedYear, selectedCountry);
+  };
 
   const handleDragStart = (e, task) => {
     setDraggedTask(task);
@@ -221,11 +244,24 @@ function Main() {
   };
 
   const handleTaskDrop = (taskId, dropDate) => {
-    setTasks([...tasks, { id: idCounter, task: newTask, date: dropDate }]);
+    setTasks([...tasks, { id: idCounter, task: newTask.text, date: dropDate,color:newTask.color }]);
     // const updatedTasks = tasks.map((task) =>
     //   tasks.id === taskId ? { ...task, date: dropDate } : task
     // );
     // setTasks(updatedTasks);
+  };
+  const onDrop = (e, targetDate) => {
+    e.preventDefault();
+    const taskId = parseInt(e.dataTransfer.getData('text/plain'), 10);
+  
+    // Remove the task from its current date
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+  
+    // Find the task with the specified taskId
+    const draggedTask = tasks.find((task) => task.id === taskId);
+  
+    // Update the task with the new date and add it to the tasks array
+    setTasks((prevTasks) => [...prevTasks, { ...draggedTask, date: targetDate }]);
   };
 
   //Search text
@@ -248,18 +284,22 @@ function Main() {
     const rows = [];
     let days = [];
     let day = startDate;
+    
+    // const publicHolidays = data.map(dateString => new Date(dateString));
     const publicHolidays = data
       ? data.map((dateString) => new Date(dateString))
       : [];
     const isPublicHoliday = (date) =>
-      publicHolidays.some((holiday) => isSameDay(date, holiday));
+    publicHolidays.some((holiday) => format(date, 'yyyy-MM-dd') === format(new Date(holiday), 'yyyy-MM-dd'));
+
+      // publicHolidays.some((holiday) => isSameDay(date,startOfDay(new Date(holiday))));
     const publicHolidaysName = pubHod
       ? pubHod.map((item) => ({
           date: new Date(item.date),
           name: item.name,
         }))
       : [];
-      
+
     const getPublicHolidayName = (date) => {
 
       const holiday = publicHolidaysName.find((h) =>isSameDay(date, h.date));
@@ -282,8 +322,18 @@ function Main() {
           <div
             key={day}
             data-value={format(day, "dd-MM-yyyy")}
+
             onClick={(e) =>
-              setSelectedDate(e.target.getAttribute("data-value")) 
+              {
+                const isHoliday = isPublicHoliday(day)
+                const publicHolidays = data.map(dateString => new Date(dateString));
+                console.log(isHoliday);
+                if (!isHoliday) {
+                  setSelectedDate(e.target.getAttribute("data-value")) 
+                  
+                }
+                
+              }
                
             }
             onDrop={(e) =>
@@ -401,6 +451,18 @@ function Main() {
                 </button>
               </div>
             </div>
+            <select onChange={(e) => handleSelectCountry(e.target.value)}>
+              <option value="BB">BB</option>
+              <option value="AT">AT</option>
+        {/* Populate country options */}
+      </select>
+      <select onChange={(e) => handleSelectYear(e.target.value)}>
+        <option value="2023">2023</option>
+        <option value="2024">2024</option>
+        {/* Populate year options */}
+      </select>
+
+      {/* Render your data using pubHod and data states */}
             <div>
               <h2>{format(currentDate, "MMMM d yyyy")}</h2>
             </div>
@@ -408,10 +470,16 @@ function Main() {
             {selectedDate}
       <input
         type="text"
-        value={newTask}
-        onChange={(e) => setNewTask(e.target.value)}
+        value={newTask.text}
+        onChange={(e) => setNewTask({ ...newTask, text: e.target.value })}
         placeholder="Add a new task"
       />
+      <input
+  type="color"
+  value={newTask.color}
+  onChange={(e) => setNewTask({ ...newTask, color: e.target.value })}
+/>
+
       <button onClick={addTask}>Add Task</button>
             </div>
 
@@ -428,7 +496,7 @@ function Main() {
 
 
       {filteredTasks.map((task) => (
-        <h3 key={task.id} style={{ color: "red" }}>
+        <h3 key={task.id} style={{ color: task.color }}>
           {task.task}
         </h3>
       ))}
