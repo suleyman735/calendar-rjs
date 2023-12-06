@@ -10,7 +10,7 @@ import Footer from './components/Footer';
 function App() {
   return (
     <BrowserRouter>
-       <Top />
+       {/* <Top /> */}
        <Routes>
         <Route exact path='/' element={<Main />}>
           

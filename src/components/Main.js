@@ -452,8 +452,8 @@ function Main() {
               </div>
             </div>
             <select onChange={(e) => handleSelectCountry(e.target.value)}>
-              <option value="BB">BB</option>
-              <option value="AT">AT</option>
+              <option value="BB">Barbados</option>
+              <option value="AT">Austria</option>
         {/* Populate country options */}
       </select>
       <select onChange={(e) => handleSelectYear(e.target.value)}>
